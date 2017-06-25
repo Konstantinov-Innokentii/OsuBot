@@ -1,9 +1,9 @@
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-#from .config import db_token
+from Osubot.config import db_token
 
-engine = create_engine('postgresql://osubot:qwerty@localhost:5432/botusers')
+engine = create_engine(db_token)
 
 
 Session = sessionmaker()

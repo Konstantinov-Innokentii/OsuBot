@@ -10,8 +10,8 @@ from Osubot.consts import *
 
 bot = telebot.TeleBot(token)
 
-#Creating custom keyboards
-#TODO: refactor the keyboard for different user_cases
+# Creating custom keyboards
+# TODO: refactor the keyboard for different user_cases
 
 keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
 button_schedule = types.KeyboardButton(text='/schedule')
@@ -38,18 +38,24 @@ def registration(message):
 
 @bot.message_handler(func=lambda message: user_status.get(message.chat.id) == "USER_REGISTRATING")
 def user_registration(message):
-    if User.get_user_by_id(message.chat.id) is None:
-        s.add(User(message.text, message.chat.id))
-        s.commit()
+    if len(str(message.text)) > 30:
+        bot.send_message(message.chat.id, "Неверный формат идентефикатора группы")
         user_status[message.chat.id] = "USER_REGISTRATED"
-        bot.send_message(message.chat.id, "Вы зарегистрированы, ваша группа {}.".format(
-            User.get_group(message.chat.id)))
+
     else:
-        User.get_user_by_id(message.chat.id).group_id = message.text
-        bot.send_message(message.chat.id, "Вы зарегистрированы, ваша группа {}.".format(
-            User.get_group(message.chat.id)))
-        s.commit()
-        user_status[message.chat.id] = "USER_REGISTRATED"
+        if User.get_user_by_id(message.chat.id) is None:
+            s.add(User(message.text, message.chat.id))
+            s.commit()
+            user_status[message.chat.id] = "USER_REGISTRATED"
+            bot.send_message(message.chat.id, "Вы зарегистрированы, ваша группа {}.".format(
+                User.get_group(message.chat.id)))
+
+        else:
+            User.get_user_by_id(message.chat.id).group_id = message.text
+            bot.send_message(message.chat.id, "Вы зарегистрированы, ваша группа {}.".format(
+                User.get_group(message.chat.id)))
+            s.commit()
+            user_status[message.chat.id] = "USER_REGISTRATED"
 
 
 @bot.message_handler(commands=["schedule"])
@@ -72,9 +78,10 @@ def send_schedule(message):
     except IndexError:
         bot.send_message(message.chat.id, "Нет расписания на сегодняшний день")
         return
+
     if range(len(parsed_data["Пара"]) != 0):
         for i in range(len(parsed_data["Пара"])):
-            bot.send_message(message.chat.id,"Пара: {}.Дисциплина: {}.Аудитория: {}.Тип: {} Групповые занятияв:{}".format(parsed_data["Пара"][i],
+            bot.send_message(message.chat.id, "Пара: {}.Дисциплина: {}.Аудитория: {}.Тип: {} Групповые занятия:{}".format(parsed_data["Пара"][i],
                              parsed_data["Дисциплина"][i], parsed_data["Аудитория"][i], parsed_data["Тип"][i],""), reply_markup=keyboard)
     else:
             bot.send_message(message.chat.id, "Групповые занятия:{} ".format(parsed_data["Групповые занятия"][0]+parsed_data["Групповые занятия"][1]+parsed_data["Групповые занятия"][2]+parsed_data["Групповые занятия"][3]),
